@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Observaciones e Identificaciones de Usuario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-check-input:checked {
+            background-color: #198754;
+            border-color: #198754;
+        }
+        .observation-img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 300px;
+            max-height: 300px;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="mb-4">Observaciones e Identificaciones de Usuario</h1>
+    <div class="input-group mb-3">
+        <input type="number" id="userIdInput" class="form-control" placeholder="Ingrese el ID del Usuario" min="1" step="1">
+        <button class="btn btn-success" onclick="loadUserData()">Conseguir Actividad de Usuario</button>
+    </div>
+
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" id="showObservations" checked>
+        <label class="form-check-label" for="showObservations">Mostrar Observaciones</label>
+    </div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" id="showIdentifications" checked>
+        <label class="form-check-label" for="showIdentifications">Mostrar Identificaciones</label>
+    </div>
+
+    <h3 id="obsTitle" class="mt-4">Observaciones</h3>
+    <div id="observations" class="row mb-5"></div>
+
+    <h3 id="identTitle">Identificaciones</h3>
+    <div id="identifications" class="row"></div>
+</div>
+
+<script>
+    async function loadUserData() {
+        const userId = document.getElementById('userIdInput').value;
+        if (!userId) return alert("Please enter a User ID");
+
+        const showObs = document.getElementById('showObservations').checked;
+        const showIdents = document.getElementById('showIdentifications').checked;
+
+        document.getElementById('obsTitle').style.display = showObs ? 'block' : 'none';
+        document.getElementById('identTitle').style.display = showIdents ? 'block' : 'none';
+
+        const requests = [];
+        if (showObs) requests.push(fetch(`/observations/user/${userId}`));
+        else requests.push(Promise.resolve({ ok: true, json: async () => [] }));
+
+        if (showIdents) requests.push(fetch(`/identifications/user/${userId}`));
+        else requests.push(Promise.resolve({ ok: true, json: async () => [] }));
+
+        const [obsRes, identRes] = await Promise.all(requests);
+
+        if (!obsRes.ok || !identRes.ok) return alert("Algo salió mal al conseguir la actividad del usuario.");
+
+        const observations = await obsRes.json();
+        const identifications = await identRes.json();
+
+        displayObservations(observations);
+        displayIdentifications(identifications);
+    }
+
+    function displayObservations(observations) {
+        const container = document.getElementById('observations');
+        container.innerHTML = '';
+
+        for (const obs of observations) {
+            const card = document.createElement('div');
+            card.className = 'col-12 observation-card';
+            card.innerHTML = `
+                <div class="card mb-4">
+                    <img src="${obs.image?.url || 'https://via.placeholder.com/300'}" class="observation-img" alt="Observation Image">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">${obs.taxon?.common_name || 'N/A'}</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nombre Científico</label>
+                                <input type="text" class="form-control" value="${obs.taxon?.species_name || 'N/A'}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Fecha</label>
+                                <input type="text" class="form-control" value="${obs.date}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Sitio (Lat, Lng)</label>
+                                <input type="text" class="form-control" value="(${obs.site?.latitude}, ${obs.site?.longitude})" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Comentario</label>
+                                <input type="text" class="form-control" value="${obs.comment || 'N/A'}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        }
+    }
+
+    function displayIdentifications(identifications) {
+        const container = document.getElementById('identifications');
+        container.innerHTML = '';
+
+        for (const ident of identifications) {
+            const card = document.createElement('div');
+            card.className = 'col-12 mb-3';
+            card.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Identificación #${ident.id}</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">ID Taxon</label>
+                                <input type="text" class="form-control" value="${ident.taxon?.id || 'N/A'}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nombre Común</label>
+                                <input type="text" class="form-control" value="${ident.taxon?.common_name || 'N/A'}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">ID Observación</label>
+                                <input type="text" class="form-control" value="${ident.observation?.id || 'N/A'}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Fecha</label>
+                                <input type="text" class="form-control" value="${ident.date || 'N/A'}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        }
+    }
+</script>
+</body>
+</html>

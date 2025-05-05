@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eliminar Observación</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .delete-container {
+            margin-top: 100px;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+<div class="container text-center delete-container">
+    <h1 class="mb-4">Eliminar Observación</h1>
+
+    <div class="input-group mb-3">
+        <input
+                type="number"
+                id="obsIdInput"
+                class="form-control"
+                placeholder="ID de Observación a Eliminar"
+                min="1"
+                step="1"
+                onkeydown="return isAllowedKey(event)">
+        <button class="btn btn-danger" onclick="deleteObservation()">Borrar</button>
+    </div>
+</div>
+
+<script>
+    function isAllowedKey(e) {
+        const invalidChars = ['e', 'E', '+', '-', '.'];
+        if (invalidChars.includes(e.key)) {
+            e.preventDefault();
+            return false;
+        }
+        return true;
+    }
+
+    async function deleteObservation() {
+        const id = document.getElementById('obsIdInput').value;
+        if (!id) return alert("Ingrese un ID de Observación");
+
+        const confirmed = confirm(`Está seguro que quiere eliminar la observación con id ${id}?`);
+        if (!confirmed) return;
+
+        const response = await fetch(`/observations/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert(`Observación ${id} eliminada con éxito.`);
+        } else {
+            alert(`Algo salió mal al eliminar la observación con id ${id}.`);
+        }
+
+    }
+</script>
+</body>
+</html>

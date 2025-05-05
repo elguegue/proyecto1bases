@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Modificar Identificación</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .identification-card {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="mb-4">Modificar Identificación</h1>
+
+    <!-- ID Identificación -->
+    <div class="input-group mb-4">
+        <input type="number" id="identIdInput" class="form-control" placeholder="Ingrese el ID de la identificación" min="1" step="1">
+        <button class="btn btn-success" onclick="loadIdentification()">Load</button>
+    </div>
+
+    <div id="formContainer" class="d-none">
+        <div class="card identification-card">
+            <div class="card-body">
+                <h5 class="card-title text-center mb-4 fw-bold">Modificar Identificación</h5>
+
+                <form id="updateIdentificationForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">ID Usuario</label>
+                                <input type="number" class="form-control" name="user_id" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">ID Observación</label>
+                                <input type="number" class="form-control" name="observation_id" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">ID Taxón</label>
+                                <input type="number" class="form-control" name="taxon_id" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Fecha</label>
+                                <input type="date" class="form-control" name="date" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-success px-5">Modificar Identificación</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentId = null;
+
+    async function loadIdentification() {
+        const id = document.getElementById('identIdInput').value;
+        const response = await fetch(`/identifications/${id}`);
+        if (!response.ok) return alert("Identification not found");
+
+        const data = await response.json();
+
+        const form = document.getElementById('updateIdentificationForm');
+        document.getElementById('formContainer').classList.remove('d-none');
+        currentId = id;
+        form.user_id.value = data.user?.id || '';
+        form.taxon_id.value = data.taxon?.id || '';
+        form.observation_id.value = data.observation?.id || '';
+        form.date.value = data.date || '';
+    }
+
+    document.getElementById('updateIdentificationForm').addEventListener("submit", async function(e) {
+        e.preventDefault();
+        if (!currentId) return alert("No se cargó identificación");
+
+        const form = e.target;
+        const data = {
+            user: { id: parseInt(form.user_id.value) },
+            taxon: { id: parseInt(form.taxon_id.value) },
+            observation: { id: parseInt(form.observation_id.value) },
+            date: form.date.value
+        };
+        const response = await fetch(`/identifications/${currentId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        alert(response.ok ? "Se modificó la identificación exitosamente!" : "Algo salió mal al modificar la identificación.");
+    });
+</script>
+</body>
+</html>

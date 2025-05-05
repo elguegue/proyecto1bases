@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Identification</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .delete-container {
+            margin-top: 100px;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+<div class="container text-center delete-container">
+    <h1 class="mb-4">Delete Identification</h1>
+    <div class="input-group mb-3">
+        <input
+                type="number"
+                id="identIdInput"
+                class="form-control"
+                placeholder="Ingrese ID de identificación a eliminar"
+                min="1"
+                step="1"
+                onkeydown="return isAllowedKey(event)">
+        <button class="btn btn-danger" onclick="deleteIdentification()">Borrar</button>
+    </div>
+</div>
+
+<script>
+    function isAllowedKey(e) {
+        const invalidChars = ['e', 'E', '+', '-', '.'];
+        if (invalidChars.includes(e.key)) {
+            e.preventDefault();
+            return false;
+        }
+        return true;
+    }
+
+    async function deleteIdentification() {
+        const id = document.getElementById('identIdInput').value;
+        if (!id) return alert("Ingrese un ID de identificación.");
+
+        const confirmed = confirm(`Está seguro que quiere eliminar la identificación ${id}?`);
+        if (!confirmed) return;
+
+        const response = await fetch(`/identifications/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert(`Identification ${id} fue eliminada exitosamente!`);
+            document.getElementById('identIdInput').value = '';
+        } else {
+            alert(`Algo salió mal eliminando la identificación con id ${id}.`);
+        }
+    }
+</script>
+</body>
+</html>

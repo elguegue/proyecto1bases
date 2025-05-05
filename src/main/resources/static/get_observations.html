@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Conseguir Observaciones</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .observation-card {
+            margin-bottom: 20px;
+        }
+        .card-img-top {
+            max-height: 300px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="mb-4">Conseguir Observaciones</h1>
+
+    <div class="input-group mb-4">
+        <input
+                type="number"
+                id="obsIdInput"
+                class="form-control"
+                placeholder="Ingresar ID de Observación"
+                min="1"
+                step="1"
+                onkeydown="return isAllowedKey(event)">
+        <button class="btn btn-success" onclick="loadObservationById()">Ver Observación</button>
+        <button class="btn btn-secondary" onclick="loadObservations()">Ver Todas</button>
+    </div>
+
+    <div id="observations" class="row"></div>
+</div>
+
+<script>
+    function isAllowedKey(e) {
+        const invalidChars = ['e', 'E', '+', '-', '.'];
+        if (invalidChars.includes(e.key)) {
+            e.preventDefault();
+            return false;
+        }
+        return true;
+    }
+
+    async function getKingdomName(taxon) {
+        let currentTaxon = taxon;
+        let level = 1; // reino se encuentra en nivel 7
+        while (currentTaxon && level < 7 && currentTaxon.taxon_ancestor_id !== null) {
+            try {
+                const response = await fetch(`/taxons/${currentTaxon.taxon_ancestor_id}`);
+                if (!response.ok) return "N/A";
+                currentTaxon = await response.json();
+            } catch (error) {
+                return "N/A";
+            }
+            level++;
+        }
+        return currentTaxon?.common_name || "N/A";
+    }
+
+
+    async function loadObservations() {
+        const response = await fetch('/observations');
+        const observations = await response.json();
+        await displayObservations(observations);
+    }
+
+    async function loadObservationById() {
+        const id = document.getElementById('obsIdInput').value;
+        if (!id) return alert("Ingrese un ID de Observación");
+
+        const response = await fetch(`/observations/${id}`);
+        if (!response.ok) return alert("Observation not encontrada");
+
+        const observation = await response.json();
+        await displayObservations([observation]);
+    }
+
+    async function displayObservations(observations) {
+        const container = document.getElementById('observations');
+        container.innerHTML = '';
+
+        for (const obs of observations) {
+            const kingdomName = obs.taxon ? await getKingdomName(obs.taxon) : 'N/A';
+
+            const card = document.createElement('div');
+            card.className = 'col-12 observation-card';
+
+            card.innerHTML = `
+        <div class="card h-100">
+          <img
+            src="${obs.image?.url || 'https://via.placeholder.com/300'}"
+            class="p-2 mx-auto d-block w-50"
+            style="max-width: 300px; max-height: 300px;"
+            alt="Observation Image">
+          <div class="card-body">
+            <h5 class="card-title text-center mb-4 fw-bold">${obs.taxon?.common_name || 'N/A'}</h5>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-2">
+                  <label class="form-label fw-bold">Nombre Científico</label>
+                  <input type="text" class="form-control" value="${obs.taxon?.species_name || 'N/A'}" readonly>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label fw-bold">Fecha</label>
+                  <input type="text" class="form-control" value="${obs.date}" readonly>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label fw-bold">Sitio (Lat, Lng)</label>
+                  <input type="text" class="form-control" value="(${obs.site?.latitude}, ${obs.site?.longitude})" readonly>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label fw-bold">Reino</label>
+                  <input type="text" class="form-control" value="${kingdomName}" readonly>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-2">
+                  <label class="form-label fw-bold">Propietario de Imagen</label>
+                  <input type="text" class="form-control" value="${obs.image?.imageOwner.name || 'Unknown'}" readonly>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label fw-bold">Licencia</label>
+                  <input type="text" class="form-control" value="${obs.image?.license.name || 'N/A'}" readonly>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label fw-bold">Sitio Imagen (Lat, Lng)</label>
+                  <input type="text" class="form-control" value="(${obs.image?.site?.latitude}, ${obs.image?.site?.longitude})" readonly>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label fw-bold">Primer Nombre de Usuario</label>
+                  <input type="text" class="form-control" value="${obs.user?.first_name || 'Unknown'}" readonly>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3">
+              <label class="form-label fw-bold">Comentario</label>
+              <input type="text" class="form-control" value="${obs.comment || 'No comment'}" readonly>
+            </div>
+          </div>
+        </div>
+      `;
+
+            container.appendChild(card);
+        }
+    }
+</script>
+</body>
+</html>

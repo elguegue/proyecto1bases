@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Conseguir Identificaciones</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .identification-card {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="mb-4">Conseguir Identificaciones</h1>
+
+    <div class="input-group mb-4">
+        <input
+                type="number"
+                id="identIdInput"
+                class="form-control"
+                placeholder="Ingresar ID de Identificación"
+                min="1"
+                step="1"
+                onkeydown="return isAllowedKey(event)">
+        <button class="btn btn-success" onclick="loadIdentificationById()">Ver Identificación</button>
+        <button class="btn btn-secondary" onclick="loadIdentifications()">Ver Todas</button>
+    </div>
+
+    <div id="identifications" class="row"></div>
+</div>
+
+<script>
+    function isAllowedKey(e) {
+        const invalidChars = ['e', 'E', '+', '-', '.'];
+        if (invalidChars.includes(e.key)) {
+            e.preventDefault();
+            return false;
+        }
+        return true;
+    }
+
+    async function loadIdentifications() {
+        const response = await fetch('/identifications');
+        const data = await response.json();
+        displayIdentifications(data);
+    }
+
+    async function loadIdentificationById() {
+        const id = document.getElementById('identIdInput').value.trim();
+
+        if (!id) {
+            alert('Please enter an Identification ID');
+            return;
+        }
+
+        const response = await fetch(`/identifications/${id}`);
+        if (!response.ok) {
+            alert('Identification not found');
+            return;
+        }
+
+        const data = await response.json();
+        displayIdentifications([data]);
+    }
+
+
+    function displayIdentifications(identifications) {
+        const container = document.getElementById('identifications');
+        container.innerHTML = '';
+
+        for (const ident of identifications) {
+            const card = document.createElement('div');
+            card.className = 'col-12 identification-card';
+            card.innerHTML = `
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-center mb-4 fw-bold">Identificación #${ident.id}</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">ID Usuario</label>
+                                    <input type="text" class="form-control" value="${ident.user?.id || 'N/A'}" readonly>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">Nombre Usuario</label>
+                                    <input type="text" class="form-control" value="${ident.user?.first_name || 'Unknown'}" readonly>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">Fecha</label>
+                                    <input type="text" class="form-control" value="${ident.date || 'N/A'}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">ID Taxon</label>
+                                    <input type="text" class="form-control" value="${ident.taxon?.id || 'N/A'}" readonly>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">Nombre Común</label>
+                                    <input type="text" class="form-control" value="${ident.taxon?.common_name || 'Unknown'}" readonly>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">ID Observación</label>
+                                    <input type="text" class="form-control" value="${ident.observation?.id || 'N/A'}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        }
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

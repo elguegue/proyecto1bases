@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Proyecto 1 Bases de Datos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .btn.btn-outline-success {
+            color: #fff;
+            background-color: #198754;
+            border-color: #198754;
+        }
+        .btn.btn-outline-success:hover {
+            color: #198754;
+            background-color: transparent;
+            border-color: #198754;
+        }
+
+        .btn.btn-outline-dark {
+            color: #fff;
+            background-color: #14532d;
+            border-color: #14532d;
+        }
+        .btn.btn-outline-dark:hover {
+            color: #14532d;
+            background-color: transparent;
+            border-color: #14532d;
+        }
+    </style>
+</head>
+<body>
+<div class="container py-5">
+    <h1 class="text-center mb-5">Proyecto 1 Bases de Datos</h1>
+
+    <!-- CRUD -->
+    <div class="card mb-5">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">Observaciones e Identificaciones</h4>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <h5>Observaciones</h5>
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-outline-success" href="add_observation.html">Añadir Observación</a>
+                        <a class="btn btn-outline-success" href="update_observation.html">Actualizar Observación</a>
+                        <a class="btn btn-outline-success" href="delete_observation.html">Borrar Observación</a>
+                        <a class="btn btn-outline-success" href="get_observations.html">Ver Observaciones</a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5>Identificaciones</h5>
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-outline-success" href="add_identification.html">Añadir Identificación</a>
+                        <a class="btn btn-outline-success" href="update_identification.html">Actualizar Identificación</a>
+                        <a class="btn btn-outline-success" href="delete_identification.html">Borrar Identificación</a>
+                        <a class="btn btn-outline-success" href="get_identifications.html">Ver Identificaciones</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Consultas -->
+    <div class="card">
+        <div class="card-header" style="background-color: #14532d; color: white;">
+            <h4 class="mb-0">Consultas</h4>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <h5>Consulta de Taxonomía</h5>
+                    <a class="btn btn-outline-dark w-100" href="taxonomy.html">Jerarquía Taxonómica de Observaciones</a>
+                </div>
+                <div class="col-md-6">
+                    <h5>Actividad de Usuario</h5>
+                    <a class="btn btn-outline-dark w-100" href="user_activity.html">Actividad de Usuarios</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
